@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const employeeSchema = new mongoose.Schema({
     employeeID: { 
@@ -8,7 +9,6 @@ const employeeSchema = new mongoose.Schema({
         type: String,
         required: true 
         },
-
     lastName: {
         type: String,
         required: true 
@@ -30,6 +30,9 @@ const employeeSchema = new mongoose.Schema({
         required:true
     },
 });
+
+
+
 
 export default mongoose.model('Employee', employeeSchema);
 

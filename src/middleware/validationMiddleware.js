@@ -9,5 +9,19 @@ const employeeValidationSchema = Joi.object({
     department: Joi.string().required(),
     position: Joi.string().required(),
 });
+const updateValidationSchema = Joi.object({
+    employeeID: Joi.number(),
+    firstName: Joi.string(),
+    lastName: Joi.string(),
+    email: Joi.string().email(),
+    dateOfBirth: Joi.date(),
+    department: Joi.string(),
+    position: Joi.string(),
+});
 
-export default employeeValidationSchema;
+const userValidationSchema = Joi.object({
+    email: Joi.string().required(),
+    password: Joi.string().required()
+})
+
+export  {employeeValidationSchema,updateValidationSchema,userValidationSchema};
