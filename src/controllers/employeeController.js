@@ -1,7 +1,6 @@
 import Employee from '../models/employeeModel.js';
 import  {employeeValidationSchema,updateValidationSchema}  from '../middleware/validationMiddleware.js';
 
-
 const createEmployee = async (req, res) => {
     try {
         const validatedData = await employeeValidationSchema.validateAsync(req.body);
@@ -14,9 +13,36 @@ const createEmployee = async (req, res) => {
 };
 
 const allEmployees = async(req,res)=>{
+    try {
+        let { page = 1, limit = 10, sort, filter } = req.query;
+        const skip = (page - 1) * limit;
+        limit = Number(limit);
+        let query = {};
+        // Apply sorting if sort parameter is provided
+        if (sort){
+            const sortingKey = sort.endsWith(':desc') ? sort.slice(0, -5) : sort;
+            const sortOrder = sort.endsWith(':desc') ? -1 : 1;
+            query = { ...query, [sortingKey]: sortOrder };
+        }
+        // Apply filtering if filter parameter is provided
+        if (filter) {
+            // Assuming filter is an object with key-value pairs
+            query = { ...query, ...JSON.parse(filter) };
+        }
+        console.log(query)
+        // Your aggregation pipeline for pagination, sorting, and filtering
+        const aggregationPipeline = [
+            { $match: query }, // Apply filtering and sorting
+            { $skip: skip },
+            { $limit: parseInt(limit) },
+        ];
+
+        const employees = await Employee.aggregate(aggregationPipeline);
+        res.json(employees);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
     
-    const allEmployees = await Employee.find({})
-    res.status(200).json(allEmployees);
 }
 
 const readEmployee = async (req, res) => {
