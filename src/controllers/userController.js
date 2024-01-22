@@ -16,7 +16,6 @@ const loginUser = async (req,res)=>{
         }
         
         const isCorrect = await user.isPasswordCorrect(password);
-        console.log("chala")
         if(!isCorrect) return res.status(400).json({message:"Incorrect Password"})
 
         const token = await refreshToken(user);

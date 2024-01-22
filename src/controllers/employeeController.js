@@ -12,29 +12,45 @@ const createEmployee = async (req, res) => {
     }
 };
 
-const allEmployees = async(req,res)=>{
+const allEmployees = async (req, res) => {
     try {
-        let { page = 1, limit = 10, sort, filter } = req.query;
+        let { page = 1, limit = 5, sort, filter } = req.query;
         const skip = (page - 1) * limit;
+        // console.log("sort "+sort)
+        // console.log("filter "+filter)
         limit = Number(limit);
-        let query = {};
-        // Apply sorting if sort parameter is provided
-        if (sort){
+        let filterQuery = {};
+        let sortQuery = {};
+
+        if (sort) {
             const sortingKey = sort.endsWith(':desc') ? sort.slice(0, -5) : sort;
             const sortOrder = sort.endsWith(':desc') ? -1 : 1;
-            query = { ...query, [sortingKey]: sortOrder };
+            sortQuery = { [sortingKey]: sortOrder };
         }
-        // Apply filtering if filter parameter is provided
+
         if (filter) {
-            // Assuming filter is an object with key-value pairs
-            query = { ...query, ...JSON.parse(filter) };
+            const filterObject = JSON.parse(filter);
+            const key = Object.keys(filterObject)[0];
+            const value = Object.values(filterObject)[0];
+
+            const newQuery = {
+            [key]: {
+                $regex: value,
+                $options: 'i'
+            }
+};
+
+console.log(newQuery);
+filterQuery = { ...newQuery };
+
         }
-        console.log(query)
-        // Your aggregation pipeline for pagination, sorting, and filtering
+        console.log(filterQuery)
+
         const aggregationPipeline = [
-            { $match: query }, // Apply filtering and sorting
+            { $match: filterQuery },
+            {$sort:sortQuery},
             { $skip: skip },
-            { $limit: parseInt(limit) },
+            { $limit: limit },
         ];
 
         const employees = await Employee.aggregate(aggregationPipeline);
@@ -42,8 +58,8 @@ const allEmployees = async(req,res)=>{
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-    
-}
+};
+
 
 const readEmployee = async (req, res) => {
     try {
