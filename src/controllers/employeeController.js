@@ -2,6 +2,7 @@ import Employee from '../models/employeeModel.js';
 import  {employeeValidationSchema,updateValidationSchema}  from '../middleware/validationMiddleware.js';
 
 const createEmployee = async (req, res) => {
+    console.log(req.body)
     try {
         const validatedData = await employeeValidationSchema.validateAsync(req.body);
         const employee = new Employee(validatedData);
@@ -14,14 +15,11 @@ const createEmployee = async (req, res) => {
 
 const allEmployees = async (req, res) => {
     try {
-        let { page = 1, limit = 5, sort, filter } = req.query;
+        let { page = 1, limit = 10, sort, filter } = req.query;
         const skip = (page - 1) * limit;
-        // console.log("sort "+sort)
-        // console.log("filter "+filter)
         limit = Number(limit);
         let filterQuery = {};
-        let sortQuery = {};
-
+        let sortQuery = {fullname:1};
         if (sort) {
             const sortingKey = sort.endsWith(':desc') ? sort.slice(0, -5) : sort;
             const sortOrder = sort.endsWith(':desc') ? -1 : 1;
@@ -40,11 +38,9 @@ const allEmployees = async (req, res) => {
             }
 };
 
-console.log(newQuery);
 filterQuery = { ...newQuery };
 
         }
-        console.log(filterQuery)
 
         const aggregationPipeline = [
             { $match: filterQuery },
